@@ -1,0 +1,73 @@
+---
+title: "Tukey DIC P1"
+author: "Fernando Haesbaert"
+date: "Março, 2021"
+---
+```{r dgp, include = FALSE, echo = FALSE, results = "hide"} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(ExpDes.pt)
+library(pacman)
+library(agricolae)
+options(scipen = 999) #prevent scientific notation 
+## Definições prévias do experimento
+t <- 5 # número de tratamentos
+j <- 4 # número de repetições
+
+##----------------------------------------------------------------------
+mt <- rep(200,t)
+sg.t <- 800
+sg.j <- 10
+sg.e <- 600
+t.dat <- matrix(rnorm(t,mt, sqrt(sg.t)),
+                nrow = t*j) # iésimo efeito de A
+j.dat <- matrix(rnorm(j, 0, sqrt(sg.j)),
+                nrow = t*j) # késimo efeito de Bloco
+e.dat <- matrix(rnorm(t*j, 0, sqrt(sg.e)),
+                nrow = t*j, ncol = 1) # iésimo efeito aleatório
+TRAT<-gl(t, 1, length = t*j, labels = c("Esmeralda", "Verde Claro", "Cardoso", "Bernacci", "Tostado"))
+REP = as.factor(c(rep(1,t),rep(2,t), rep(3,t), rep(4,t)))
+Y = c(round(j.dat + t.dat + e.dat)/5)
+plan <- data.frame(TRAT, REP, Y)  # tabela
+
+## SOLUTION
+anova<-aov(Y~TRAT)
+qanova<-summary(anova)
+tuk <- HSD.test(anova,as.factor("TRAT"),console=TRUE) # Pacote agricolae
+delta<-round(tuk[[1]][1,5],1)
+grupos<-tuk[5]
+``` 
+Question
+========
+Uma experimento no delineamento inteiramente casualizado foi realizado para analisar o desempenho de `r t` genótipos de Jiló $Solanum\ gilo$ Raddi (Esmeralda, Verde-Claro, Cardoso, Bernacci e Tostado) utilizando `r j` repetições. As avaliações foram sistematizadas quanto a massa de frutos  em $(t/ha)$, os dados estão apresentados na tabela 1 e o quadro da ANOVA na tabela 2.
+Considerando $\alpha$ = 5%, reponda a questão abaixo.
+  
+*OBS. Utilize 1 casas decimais e a vírgula como separador decimal na sua resposta. Exemplo: 1,2*
+  
+$\textbf {Tabela 1: Produtividade de genótipos de Jiló.}$
+```{r tablea, echo=FALSE}
+kable(data.frame(TRAT,REP,Y), align="ccc")
+```
+
+$\textbf {Tabela 2: Quadro da ANOVA para produtividade de genótipos de Jiló.}$
+```{r tableb, echo=FALSE}
+print(qanova)
+```
+
+Qual o valor do $\Delta (Diferença Mínima Significativa)$ do teste $Tukey$?
+
+Solution
+========
+O valor do $\Delta (Diferença Mínima Significativa)$ do teste $Tukey$ é: `r delta` \
+
+```{r tablec, echo=FALSE}
+print(grupos)
+```
+
+Meta-information
+================
+exname: Delta_Tukey_P1
+extype: num
+exsolution: `r delta`
+extol: 0.2

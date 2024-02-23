@@ -1,0 +1,59 @@
+```{r dgp, include = FALSE} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(moments)
+options(scipen = 999) #prevent scientific notation 
+
+## RANDOM DATA 
+n<-10:15 %>% sample(1) #amostra piloto
+cult1 <- 250:300 %>% sample(n) #amostra1
+cult2 <- 150:250 %>% sample(n) #amostra2
+dados<-data.frame("Cultivar 1"=cult1, "Cultivar 2"=cult2)
+## SOLUTION
+media1 <- round(mean(cult1),2)
+mediana2 <- round(median(cult2),2)
+var1<-round(var(cult1),2)
+dp2 <- round(sd(cult2),2)
+ca1<-round(skewness(cult1),2)
+``` 
+Question
+========
+Em um experimento de competição de variedades de batata ($Solanum\ tuberosum$) foram obtidos os rendimentos (em t/ha) em `r n` amostras em cada cultivar:
+
+$\textbf {Tabela\ de\ dados}$
+```{r table, echo=FALSE}
+kable(dados, align="cc")
+```
+
+*OBS. Utilize números com duas casas decimais, sem a unidade de medida nas suas respostas. Exemplo: 1,23*
+
+Reponda as seguintes questões:
+
+Questionlist
+------------
+* I) A Cultivar 1 tem média igual a? \
+* II) Mediana da Cultivar 2 é? \
+* III) A variância da Cultivar 1 é igual a? \
+* IV) O desvio padrão da Cultivar 2 é igual a? \
+* V) O coeficiente de assimentria da Cultivar 1 é igual a? \
+
+
+Solution
+========
+Solutionlist
+------------
+* O valor da média da Cultivar 1 é igual a: `r media1` 
+* O valor da mediana da Cultivar 2 é igual a: `r mediana2`
+* O valor da variância da Cultivar 1 é igual a: `r var1`
+* O valor do desvio padrão da Cultivar 2 é igual a: `r dp2`
+* O valor do coeficiente de assimentria da Cultivar 1 é igual a: `r ca1`
+
+
+Meta-information
+================
+exname: P1
+extype: cloze
+exclozetype: num|num|num|num|num
+exsolution: `r media1`|`r mediana2`|`r var1`|`r dp2`|`r ca1`
+extol: 0.05

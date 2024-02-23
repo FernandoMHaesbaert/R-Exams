@@ -1,0 +1,53 @@
+```{r data_generation, echo = FALSE, results = "hide"}
+library(exams)
+## gerando os dados do problema
+# dados originais:		y = 0,5 + 1,8x , com R² = 0,8
+alphaA <- sample(seq(190, 210, 0.5), 1)
+betaA <- sample(seq(0.6, 1.0, 0.01), 1)
+alphaB <- sample(seq(40, 50, 0.5), 1)
+betaB <- sample(seq(1.1, 1.3, 0.01), 1)
+ra <- sample(seq(0.6, 0.75, 0.01), 1)
+rb <- sample(seq(0.8, 0.95, 0.01), 1)
+
+## faca a resposta correta ser a primeira e as outras falsas
+questions <- c("A sequência correta é: Safra A, Safra B, Safra B", 
+               "A sequência correta é: Safra A, Safra A, Safra A",
+               "A sequência correta é: Safra A, Safra B, Safra A",
+               "A sequência correta é: Safra B, Safra A, Safra B",
+               "A sequência correta é: Safra B, Safra B, Safra A")
+solutions <- c(TRUE, rep(FALSE, 4))
+
+## aleatorizando as alternativas
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+```
+
+Question
+========
+Um estudo de duas safras forneceu as seguintes informações:  
+Safra A: $Y = `r alphaA` + `r betaA`X$, $r = `r ra`$  
+Safra B: $Y = `r alphaB` + `r betaB`X$, $r = `r rb`$,   
+onde Y é a produção por hectare e X é a quantidade de chuva (em milímetros) no período da safra. 
+
+i) Se não houvesse chuva, qual safra produziu mais?
+ii) Qual safra tira maior proveito do aumento das chuvas? 
+iii) Qual safra é possível predizer a produção com melhor aproximação?
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+exams::answerlist(questions, markup = "markdown")
+```
+
+Solution
+========
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+exams::answerlist(ifelse(solutions, "Correta", "Incorreta"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r exams::mchoice2string(solutions, single = TRUE)`
+exname: regressão linear

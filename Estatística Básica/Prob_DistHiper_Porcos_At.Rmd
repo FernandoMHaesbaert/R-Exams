@@ -1,0 +1,53 @@
+```{r data_generation, echo = FALSE, results = "hide"}
+library(exams)
+#Dados da questao
+lote <- sample(c(100, 150, 200, 250, 300),1)
+amostra <- sample(c(10, 15, 20, 25, 30),1)
+doente <- sample(c(2:5),1)
+#Resolução
+p0 <- round(1 - dhyper(0,doente,lote-doente,amostra),4)
+erro1 <- round(dhyper(0,doente,lote-doente,amostra),4)
+erro2 <- round(1 - dhyper(1,doente,lote-doente,amostra),4)
+erro3 <- round(dhyper(1,doente,lote-doente,amostra),4)
+erro4 <- round(1 - dhyper(2,doente,lote-doente,amostra),4)
+#Faca a resposta correta ser a primeira e as outras falsas
+questions <- paste(c(p0, erro1, erro2, erro3, erro4))
+solutions <- c(TRUE, rep(FALSE, 4))
+
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+```
+
+Question
+========
+Suínos criados em uma fazenda no Sul do Tocantins são expedidos em lotes de `r lote` animais. Antes que a remessa seja aprovada para a carga, um inspetor do frigorífico escolhe aleatoriamente `r amostra` animais do lote e os inspeciona. Se nenhuma dos animais inspecionados apresentar sintomas da doença $Coccidiose \ suína$, o lote é aprovado. Se um ou mais animais forem sintomáticos, todo o lote é inspecionado. Supondo que haja `r doente` animais sintomáticos no lote, qual é a probabilidade de que o inspetor aponte para a inspeção total?
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+answerlist(questions, markup = "markdown")
+```
+
+Solution
+========
+P(X >= 1) = 1 - P(X = 0)		
+		
+Utilizando o modelo hipergeométrico:		
+
+$P(X = 0) = \frac{(_0^`r doente`) \times (_{`r amostra`-0}^{`r lote`-`r doente`})}{(_{`r amostra`}^{`r lote`})}$
+
+$P(X = 0) = \frac{`r choose(doente,0)` \times `r choose(lote-doente,amostra-0)`}{`r choose(lote,amostra)`}$
+
+$P(X = 0) = `r choose(doente,0) * choose(lote-doente,amostra-0)/ choose(lote,amostra)`$
+
+Logo, P(X >= 1) = 1 - `r choose(doente,0) * choose(lote-doente,amostra-0)/ choose(lote,amostra)` = `r 1 - (choose(doente,0) * choose(lote-doente,amostra-0)/ choose(lote,amostra))`		
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+answerlist(ifelse(solutions, "Correta", "Incorreta"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r mchoice2string(solutions, single = TRUE)`
+exname: variáveis aleatórias discretas e distribuições de probabilidade

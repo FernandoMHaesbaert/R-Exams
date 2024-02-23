@@ -1,0 +1,82 @@
+```{r dgp, include = FALSE} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(xtable)
+options(scipen = 999) #prevent scientific notation 
+
+## RANDOM DATA 
+n <- sample(seq(1000,2000,100),1)
+med <- seq(25,35) %>% sample(1)#média
+dp <- seq(3,8) %>% sample(1) #desvio padrão
+p1 <- seq(10,15) %>% sample(1) #pequenos
+p2 <- seq(50,60) %>% sample(1) #médios
+p3 <- seq(15,20) %>% sample(1) #grandes
+p4 <- 100 - p1 - p2 - p3 #extra
+
+## SOLUTION
+x1 <- round(qnorm(p1/100)*dp+med, 1)
+x2 <- round(qnorm((p1+p2)/100)*dp+med, 1)
+x3 <- round(qnorm((p1+p2+p3)/100)*dp+med, 1)
+``` 
+Question
+========
+A distribuição dos pesos de cabras da raça Boer prontas para o abate criados numa granja no Sul do Tocantin, pode ser representada por uma distribuição Normal, com média `r med` kg e desvio padrão `r dp` kg. Um abatedouro comprará um lote de `r n` cabras e para realizar a compra, precisa classificar os animais de acordo com o peso da seguinte forma: `r p1`% dos mais leves como pequenas, os `r p2`% seguintes como médias, os `r p3`% seguintes como grandes e os `r p4`% mais pesados como extras. Responda as seguintes questões:\
+
+Classificação:  
+$Pequenas | Médias  | Grandes | Extra$  
+$----X1--X2---X3--$ 
+  
+*OBS. Utilize 1 casas decimais e a vírgula como separador decimal na sua resposta, considerando o peso em Kg. Exemplo: Para um peso de 12,3 Kg, responda como 12,3*
+
+Questionlist
+------------  
+* Qual o limite de peso $X_1$? Limite que separa as pequenas das médias.\
+* Qual o limite de peso  $X_2$? Limite que separa as médias das grandes.\
+* Qual o limite de peso  $X_3$? Limite que separa as grandes das extra.\
+  
+Solution
+========
+Solutionlist
+------------
+* O limite de peso $X_1$?\ é: `r x1` 
+* O limite de peso $X_2$?\ é: `r x2` 
+* O limite de peso $X_3$?\ é: `r x3`   
+
+
+Resolução:\    
+a)  
+$P(X<x_1) = `r p1`%$  
+$P(Z < \frac{x_1-`r med`}{`r dp`}) = `r p1/100`$  
+$\frac{x_1-`r med`}{`r dp`} = `r qnorm(p1/100)`$  
+$x_1 = `r qnorm(p1/100)`*`r dp`+`r med`$  
+$x_1 = `r round(qnorm(p1/100)*dp+med,1)`$\  
+  
+  
+b)  
+$P(X<x_2) = `r p1+p2`%$  
+$P(Z < \frac{x_2-`r med`}{`r dp`}) = `r (p1+p2)/100`$  
+$\frac{x_2-`r med`}{`r dp`} = `r qnorm((p1+p2)/100)`$  
+$x_2 = `r qnorm((p1+p2)/100)`*`r dp`+`r med`$  
+$x_2 = `r round(qnorm((p1+p2)/100)*dp+med,1)`$\  
+  
+  
+c)  
+$P(X<x_3) = `r p1+p2+p3`%$  
+$P(Z < \frac{x_3-`r med`}{`r dp`}) = `r (p1+p2+p3)/100`$  
+$\frac{x_3-`r med`}{`r dp`} = `r qnorm((p1+p2+p3)/100)`$  
+$x_3 = `r qnorm((p1+p2+p3)/100)`*`r dp`+`r med`$  
+$x_3 = `r round(qnorm((p1+p2+p3)/100)*dp+med,1)`$   
+
+
+Meta-information
+
+
+================
+
+
+exname: ProbNorm  
+extype: cloze  
+exclozetype: num|num|num  
+exsolution: `r x1`|`r x2`|`r x3`  
+extol: 0.2

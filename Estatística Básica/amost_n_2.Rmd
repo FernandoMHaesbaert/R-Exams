@@ -1,0 +1,45 @@
+```{r dgp, include = FALSE} 
+library(exams)
+library(magrittr)
+library(knitr)
+options(scipen = 999) #prevent scientific notation 
+
+## RANDOM DATA 
+npiloto <- 40:60 %>% sample(1) #amostra piloto
+sigma2 <- 350:500 %>% sample(1) #variância amostarl
+xbar <- round(50:60,1) %>% sample(1) #média
+ep <- 3:6 %>% sample(1) #erro da média
+
+## SOLUTION
+zcrit <- round(qnorm(0.975),2)
+epm <- round(ep/100*xbar,2)
+n1 <- ceiling((zcrit^2*sigma2)/(epm^2))
+n_faltante <- n1 - npiloto
+``` 
+Question
+========
+Um pesquisador deseja amostrar uma população de plantas de Mucuna Cinza ($Mucuna\ pruriens\ L.$) com o interesse de estabelecer a média de produção de grãos por planta. Uma amostra piloto de `r npiloto` plantas, coletada na lavoura em questão, indicou média de `r xbar` $g\ planta^{^-1}$ e variância igual a `r sigma2` gramas. Determine quantas plantas devem ser amostradas, além das `r npiloto` já coletas, para estimação da média (μ), com erro de no máximo `r ep`% da média.  Considera o nível de significância de 5%.
+
+
+
+*OBS. Utilize número inteiro, arredondamento para o número superior caso necessário. Exemplo: 10*
+
+Solution
+========
+Resolução:
+$n=\frac{(z_\frac{\alpha}{2})\,^2*s^2}{(erro\, padrão\, da\, média)^2}$
+
+$n=\frac{`r zcrit`^2*`r sigma2`}{`r epm`^2}$
+  
+$n=`r n1`$  
+Como já foram amostradas `r npiloto`,   
+$n_faltante = `r n1` - `r npiloto`$  
+$n_faltante = `r n1 - npiloto`$
+
+
+Meta-information
+================
+exname: amost_n
+extype: num
+exsolution: `r n_faltante`
+extol: 1

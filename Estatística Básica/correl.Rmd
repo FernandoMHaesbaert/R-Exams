@@ -1,0 +1,40 @@
+```{r dgp, include = FALSE}
+library(exams)
+library(magrittr)
+library(knitr)
+options(scipen = 999) #prevent scientific notation 
+
+## RANDOM DATA 
+n <- seq(30, 40) %>% sample(1)
+y <- round(rnorm(n, 350, 50), 0)
+x <- round(y/10 + rnorm(n, 15, 2), 1)
+
+## SOLUTION
+correl <- cor(y, x) %>% round(3)
+```
+
+Question
+========
+A cultura do capim mombaça ($Megathyrsus\ maximus$), é uma espécie de planta pertencente à família Poaceae. Uma cultura para áreas de solo com maior fertilidade, sendo indicada em sistemas de Integração Lavoura-Pecuária (ILP). Para avaliar a cobertura de solo pelo capim mombaça, foram coletadas `r n` amostras de massa seca de palhada ($g/m²$) - variável dependente e altura média de plantas ($cm$) - variável independente. Considere os valores listados na tabela abaixo:
+
+```{r table, echo=FALSE}
+kable(data.frame(Amostra = factor(1:n),
+                 "  Altura_de_Plantas  " = x, 
+                 "Massa_Seca_de_Palhada_(g/m²)" = y), 
+      align="ccc")
+```
+
+Calcule o coeficiente de correlação linear de Pearson.
+
+OBS. Utilize 2 casas decimais e a vírgula como separador decimal na sua resposta. Exemplo: 0,52
+
+Solution
+========
+O coeficiente de correlação linear de Pearson é: `r correl`
+
+Meta-information
+================
+exname: correlacao
+extype: num
+exsolution: `r correl`
+extol: `r correl * 0.015`

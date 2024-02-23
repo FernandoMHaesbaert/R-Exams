@@ -1,0 +1,91 @@
+```{r dgp, include = FALSE} 
+library(exams)
+library(magrittr)
+library(knitr)
+options(scipen = 999) #prevent scientific notation 
+
+## RANDOM DATA 
+n <- 30:50 %>% sample(1) #n
+med1 <- seq(0.3, 0.6, 0.02) %>% sample(1) #n
+med2 <- med1 - med1*0.05
+amostra1 <- round(rnorm(n, med1, med1*0.01), 3)
+k <- seq(0.01, 0.03, 0.001) %>% sample(1) #n
+amostra2 <- round(rnorm(n, med2, med2*k), 3)
+tab <- data.frame(Amostra = factor(1:n), 
+                  IPR_91_Baili = amostra1, 
+                  IPR_92_Altar = amostra2)
+alpha <- 0.05
+## SOLUTION
+vari.test <- var.test(amostra1, amostra2) #teste de variância
+tvar <- ifelse(vari.test$p.value > alpha, 
+               "Variâncias Homogêneas", 
+               "Variâncias Heterogêneas")
+  if (vari.test$p.value > alpha) {
+    diff.test <- t.test(amostra1, amostra2, 
+                        alternative = "two.sided", 
+                        var.equal = TRUE, 
+                        mu = 0)
+  } else {
+    diff.test <- t.test(amostra1, amostra2, 
+                        alternative = "two.sided", 
+                        var.equal = FALSE, 
+                        mu = 0)}
+names(diff.test)
+tcalc <- round(diff.test [[1]][1], 4)
+tcrit <- round(qt(0.025, diff.test$parameter), 4)
+sig <- ifelse(diff.test$p.value < alpha, "Sim", "Não")
+``` 
+Question
+========
+A cultura do trigo-mourisco ($Fagopyrum\ esculentumé$), também chamado de trigo-sarraceno, é uma planta herbácea, anual de ciclo curto, dicotiledônea da família das poligonáceas. Uma cultura rústica, grande tolerância à acidez e capacidade de utilização de fósforo e potássio pouco solúveis no solo. Por conseguir bom desenvolvimento em solos pobres, é considerada de amplo cultivo, sendo muito eficiente como planta de cobertura para solos pobres em nutrientes. Para avaliar a cobertura de solo de duas cultivares dessa espécie (cultivares: $IPR 91 – Baili$ e $IPR 92 - Altar$), foram coletadas `r n` amostras de massa seca de palhada ($Kg/m²$) em duas áreas de cultivo lado a lado na região Sul do Tocantins. Com base nos dados das `r n` avaliações em cada cultivar apresentados na tabela abaixo: 
+```{r table, echo=FALSE}
+kable(data.frame(tab), align="lc")
+```
+
+Considerando o nível de 5% de significância responda:
+
+*OBS. Utilize 2 casas decimais e a vírgula como separador decimal na sua resposta. Exemplo: 1,23*
+
+
+Questionlist
+------------
+* Qual o valor da estatística calculada do teste?\
+
+* A massa média de palhada das cultivares IPR 91 - Baili e IPR 92 - Altar não diferem estatísticamente.
+ 
+* A massa média de palhada das cultivares IPR 91 - Baili e IPR 92 - Altar diferem estatísticamente.
+
+
+Solution
+========
+
+Solutionlist
+------------
+* O valor da estatística calculada do teste T é: $T_{calc}=$ `r tcalc` 
+
+* `r sig` é possível afirmar que massa média de palhada das cultivares IPR 91 - Baili e IPR 92 - Altar diferem estatísticamente.
+
+*
+
+<br/>
+**Resolução**:<br/>  
+Teste de Variâncias:<br/>  
+Resultado do teste para variâncias: `r tvar` <br/>  
+Logo:<br/>    
+$a)$ $H_0: \mu_{(IPR 91 - Baili)} = \mu_{(IPR 92 - Altar)}$  <br/>
+$H_1: \mu_{(IPR 91 - Baili)} \ne \mu_{(IPR 92 - Altar)}$  <br/>
+$b)$ $\alpha = 5\%$  <br/>
+$c)$ $T_{calc} = `r tcalc`$  <br/>
+$d)$ $T_{tab} = `r round(tcrit, 3)` \ e \ `r round(-tcrit, 3)`$  <br/>
+$e)$  <br/>
+```{r plot, echo=FALSE, fig.cap=" "}
+ifelse(diff.test$p.value<alpha,"Teste é significativo.","Teste é não significativo.")
+```
+
+Meta-information
+================
+exname: TH_Test_vd
+extype: cloze
+exclozetype: num|schoice
+exsolution: `r tcalc`|`r ifelse(diff.test$p.value<alpha, "01", "10")`
+extol: 0.02

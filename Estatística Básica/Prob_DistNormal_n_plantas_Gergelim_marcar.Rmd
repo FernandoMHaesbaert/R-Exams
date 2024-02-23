@@ -1,0 +1,64 @@
+```{r data_generation, echo = FALSE, results = "hide"}
+#Dados da questao
+np <- sample(1000:2000, size = 1)
+media <- sample(150:180, size = 1)
+dp <- sample(10:20, size = 1)
+li <- round(sample((media-0.5*dp):(media-1.2*dp), size = 1),0)
+ls <- round(sample((media+0.5*dp):(media+1.2*dp), size = 1),0)
+
+#Faca a resposta 
+z1 <- (li-media)/dp
+z2 <- (ls-media)/dp
+pz1 <- round(pnorm(z1), 2)
+pz2 <- round(pnorm(z2), 2)
+pz <- pz2 - pz1
+nps <- round(np*pz,0)
+correta <- paste0(nps, " plantas")
+# Erradas
+erro1 <- nps - sample(3:13, size = 2, replace = FALSE)
+erro2 <- nps + sample(3:19, size = 2, replace = FALSE)
+erros1 <- paste0(erro1, " plantas")
+erros2 <- paste0(erro2, " plantas")
+
+questions <- c(correta, erros1[1], erros1[2], erros2[1], erros2[2])
+solutions <- c(TRUE, rep(FALSE, 4))
+
+o <- sample(1:5)
+questions <- questions[o]
+solutions <- solutions[o]
+```
+
+Question
+========
+Em um programa de melhoramento de gergelim $Sesamum\ indicum$ contendo `r np` plantas que apresentam altura de plantas normalmente distribuída com média igual a `r media` cm e desvio padrão `r dp` cm. O melhorista precisa selecionar todas as plantas com alturas entre  `r li` e `r ls`. Considerando-se as propriedades do desvio padrão para distribuições normais, o melhorista deve selecionar quantas plantas: 
+
+
+```{r questionlist, echo = FALSE, results = "asis"}
+exams::answerlist(questions, markup = "markdown")
+```
+
+Solution
+========
+N = `r np` plantas e $\mu =$ `r media` e $\sigma =$ `r dp`
+
+$Z1 = \frac{X - \mu}{\sigma} = \frac{`r li` - `r media`}{`r dp`} = \frac{`r li - media`}{`r dp`} = `r (li-media)/dp`\\$
+
+$Z2 = \frac{X - \mu}{\sigma} = \frac{`r ls` - `r media`}{`r dp`} = \frac{`r ls - media`}{`r dp`} = `r (ls-media)/dp`\\$  
+
+$P(Z1 < Z < Z2) = P(Z < Z2) - P(Z < Z1)=\\$  
+$P(Z < Z2) = P(Z < `r z2`) = `r pz2`\\$  
+$P(Z < Z1) = P(Z < `r z1`) = `r pz1`\\$  
+$P(Z1 < Z < Z2) = `r pz2` - `r pz1`\\$  
+$P(Z1 < Z < Z2) = `r pz`\\$  
+
+número de plantas = $`r pz` \cdot `r np` = `r nps`$
+
+```{r solutionlist, echo = FALSE, results = "asis"}
+exams::answerlist(ifelse(solutions, "Correta", "Incorreta"), markup = "markdown")
+```
+
+Meta-information
+================
+extype: schoice
+exsolution: `r exams::mchoice2string(solutions, single = TRUE)`
+exname: distr normal

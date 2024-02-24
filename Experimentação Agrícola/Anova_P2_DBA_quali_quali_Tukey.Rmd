@@ -1,0 +1,152 @@
+---
+title: "Experimento Biaftorial em DBA_A_B"
+author: "Fernando Haesbaert"
+date: "Mar, 2021"
+---
+```{r dgp, include = FALSE, echo = FALSE, results = "hide"} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(ExpDes.pt)
+library(easyanova)
+library(kableExtra)
+library(tidyverse)
+options(scipen = 999) #prevent scientific notation 
+rm(list = ls()) #limpando a memória do R
+## Definições prévias do experimento
+a <- 3 # número de níveis do fator A
+d <- 4 # número de níveis do fator D
+t <- a*d # número de tratamentos
+b <- 5 # número de blocos
+
+##-----------------------------------
+ma <- seq(100,200,50)
+md <- c(100, 120, 140, 160)
+sg.a <- 150
+sg.d <- 250
+sg.b <- 100
+sg.e <- 1000
+a.dat <- matrix(rnorm(a,ma, sqrt(sg.a)),
+                nrow = a*d*b) # iésimo efeito de A
+d.dat <- matrix(rnorm(d, md, sqrt(sg.d)),
+                nrow = a*d*b) # jésimo efeito de D
+b.dat <- matrix(rnorm(b, 0, sqrt(sg.b)),
+                nrow = a*d*b) # késimo efeito de Bloco
+e.dat <- matrix(rnorm(a*d*b, 0, sqrt(sg.e)),
+                nrow = a*d*b, ncol = 1) # iésimo efeito aleatório
+plan <- transform(data.frame(expand.grid(Fat_A=gl(a,1,la=LETTERS[1:a]),
+                  Fat_D=c("D1", "D2", "D3", "D4"), Bloco = 1:b),
+                  Y = c(round((b.dat + a.dat + d.dat + e.dat)/100,2))),
+                  Fat_A = factor(Fat_A),Fat_D = factor(Fat_D),
+                  Bloco = factor(Bloco))  # tabela de dados
+## Estrutura dos dados
+str(plan)
+Bloco <- plan$Bloco
+Cultivar <- plan$Fat_A
+Inoculante <- plan$Fat_D
+Prod <- plan$Y
+## SOLUTION
+mg <- mean(Prod)
+myanova <- summary(aov(Y ~ Bloco + Fat_A*Fat_D, data=plan))
+qme <- round(myanova[[1]][5,3],3)
+fcb <- round(myanova[[1]][1,4],3)
+fca <- round(myanova[[1]][2,4],3)
+fcd <- round(myanova[[1]][3,4],3)
+fcad <- round(myanova[[1]][4,4],3)
+interacao <- ifelse(myanova[[1]][4,5]<=0.05, "Sim", "Não")
+sigA <- ifelse(myanova[[1]][2,5]<=0.05, "Sim", "Não")
+sigD <- ifelse(myanova[[1]][3,5]<=0.05, "Sim", "Não")
+
+# Com easyanova
+rs <- ea2(plan, design = 2, alpha = 0.05, cov = 4, list = FALSE, p.adjust=1, plot=2)
+
+# Análise Complementar
+if (interacao == "Sim"){
+  deltaA <- round(3.432*sqrt(qme/b),4)
+  tukfAD1<-rs[[6]][[1]][,c(1,2,4)]
+  tukfAD2<-rs[[6]][[2]][,c(1,2,4)]
+  tukfAD3<-rs[[6]][[3]][,c(1,2,4)]
+  tukfAD4<-rs[[6]][[4]][,c(1,2,4)]
+  deltaD <- round(3.78*sqrt(qme/b),4)
+  tukfDA1<-rs[[8]][[1]][,c(1,2,4)]
+  tukfDA2<-rs[[8]][[2]][,c(1,2,4)]
+  tukfDA3<-rs[[8]][[3]][,c(1,2,4)]
+  } else {
+    if (sigA == "Sim"){
+      deltaA <- round(3.432*sqrt(qme/(d*b)),4) 
+      tukfAsi<-rs[[2]][,c(1,2,4)] %>% round(4)
+    }
+    if (sigD == "Sim"){
+      deltaD  <- round(3.78*sqrt(qme/(a*b)),4)
+      tukfDsi<-rs[[4]][,c(1,2,4)]
+      }   
+  } 
+
+
+# Yij^2
+yijk2 <- sum(Prod^2)
+
+SomatorioTrats <- plan %>% 
+  group_by(Fat_A, Fat_D) %>% 
+  summarise(
+    Soma = sum(Y)
+  )
+
+SomaBlocos <- plan %>% 
+  group_by(Bloco) %>% 
+  summarise(
+    SomaBloc = sum(Y)
+  )
+``` 
+Question
+========
+Uma experimento no delineamento blocos ao acaso foi realizado para analisar o desempenho de `r a` cultivares de soja (Cultivares A, B e C) combinadas com `r d` inoculantes (D1, D2, D3, D4). As avaliações foram sistematizadas quanto ao desempenho produtivo das cultivares em $t/ha$, conforme a tabela a seguir:
+Considerando $\alpha$ = 5%, responda as questões abaixo:
+
+$Dados\ do\ Exercício$  
+$\textbf {Tabela 1: Somatório Tratamentos.}$
+```{r table2, echo=FALSE}
+kable(data.frame(SomatorioTrats), align="ccc")
+```
+
+
+$\textbf {Tabela 2: Somatório dos Blocos.}$
+```{r table3, echo=FALSE}
+kable(data.frame(SomaBlocos), align="cc")
+```
+
+O somatório das unidades experimentais ao quadrado é igual a:  
+$\sum Y_{ijk}^2=`r yijk2`$
+
+
+Questionlist
+------------
+* Qual o valor do F calculado de Bloco? \
+* Qual o valor do F calculado do Fator Cultivar? \
+* Qual o valor do F calculado do Fator Inoculante? \
+* Qual o valor do F calculado da interação entre os dois fatores? \
+* O efeito da interação é significativo. \
+* O efeito da interação é não significativo. \
+* Qual o valor do $\Delta$ (difereça mínima significativa) para compararar as médias do fator A? \
+* Qual o valor do $\Delta$ (difereça mínima significativa)para compararar as médias do fator D? \
+
+Solution
+========
+Solutionlist
+------------
+* O valor do F calculado de Bloco é: `r fcb` 
+* O valor do F calculado do Fator Cultivar é: `r fca` 
+* O valor do F calculado do Fator Inoculante é: `r fcd` 
+* O valor do F calculado da interação entre os fatores é: `r fcad` 
+* O efeito da interação é `r interacao` significativo.
+* 
+* O valor do $\Delta$ (difereça mínima significativa) para compararar as médias do fator A é: `r deltaA` 
+* O valor do $\Delta$ (difereça mínima significativa) para compararar as médias do fator D é: `r deltaD`
+  
+Meta-information
+================
+exname: BifatDba
+extype: cloze
+exclozetype: num|num|num|num|schoice|num|num
+exsolution: `r fcb`|`r fca`|`r fcd`|`r fcad`|`r ifelse(myanova[[1]][4,5]<=0.05, "10", "01")`|`r deltaA`|`r deltaD`
+extol: 0.02

@@ -1,0 +1,193 @@
+---
+title: "ANOVA DQL_Regressão 2021/1"
+author: "Fernando Haesbaert"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+```{r dgp, include = FALSE, echo = FALSE, results = "hide"} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(ExpDes.pt)
+library(pacman)
+library(agricolae)
+library(ggplot2)
+library(tidyverse)
+library(gexp)
+library(ggpmisc)
+options(scipen = 999) #prevent scientific notation 
+
+## Definições prévias do experimento
+i <- sample(5:6, 1) # número de Tratamentos
+j <- 6 # número de Blocos
+h <- sample(c(25,26,27,28,29),1) # amplitude das doses
+
+# Tabela de dados
+TRAT <- seq(0, length.out = i, by=h) # Doses
+b0 <- runif(1, 25, 35)
+b1 <- runif(1, 0.7, 0.8)
+b2 <- -0.005
+e <- rnorm(i,2,2)
+yb1 <- b0+b1*TRAT+b2*TRAT^2+e
+e <- rnorm(i)
+yb2 <- b0+b1*TRAT+b2*TRAT^2+e
+e <- rnorm(i)
+yb3 <- b0+b1*TRAT+b2*TRAT^2+e
+e <- rnorm(i,2,2)
+yb4 <- b0+b1*TRAT+b2*TRAT^2+e
+e <- rnorm(i)
+yb5 <- b0+b1*TRAT+b2*TRAT^2+e
+e <- rnorm(i)
+yb6 <- b0+b1*TRAT+b2*TRAT^2+e
+y <- c(yb1,yb2,yb3,yb4,yb5,yb6)
+plan <- transform(data.frame(expand.grid(
+                  TRAT=TRAT, BLOCO = 1:j),
+                  Y = y), BLOCO = factor(BLOCO))  # tabela
+plan <- plan %>% arrange(plan,TRAT, BLOCO)
+plan$Y <- plan$Y %>% round(2)
+
+## SOLUTION
+glt <- i-1
+glb <- j-1
+gle <- (i-1)*(j-1)
+gltot <- i*j-1
+anova <- aov(Y ~ as.factor(TRAT) + BLOCO, data=plan)
+myanova <- summary(anova)
+sqt <- round(myanova[[1]][1,2],3)
+sqb <- round(myanova[[1]][2,2],3)
+sqe <- round(myanova[[1]][3,2],3)
+sqtot <- sqt + sqb + sqe
+qmt <- round(myanova[[1]][1,3],3)
+qmb <- round(myanova[[1]][2,3],3)
+qme <- round(myanova[[1]][3,3],3)
+fct <- round(myanova[[1]][1,4],3)
+fcb <- round(myanova[[1]][2,4],3)
+ftt <- round(qf(1-0.05,glt,gle),2)
+ftb <- round(qf(1-0.05,glb,gle),2)
+ef_trat <- ifelse(myanova[[1]][1,5]<=0.05, 
+                  "Significativo", "Não Significativo")
+ef_bloco <- ifelse(myanova[[1]][2,5]<=0.05, 
+                   "Significativo", "Não Significativo")
+cv <- round(sqrt(qme)/mean(plan$Y)*100, 3)
+
+## Regressão
+graumod <- "Quadrático"
+modelo <- lm(plan$Y ~ plan$TRAT + I(plan$TRAT^2))
+b0mod <- modelo$coefficients[1]
+b1mod <- modelo$coefficients[2]
+b2mod <- modelo$coefficients[3]
+
+reg_exp <- dbc(plan$TRAT, plan$BLOCO, plan$Y, quali = FALSE)
+R2 <- reg_exp$reg$`R2 parabola`
+p <- 3 #para quadrático
+R2aj <- R2-((p-1)/(4-p)*(1-R2))
+pmet <- round(-b1mod/(2*b2mod),3)
+``` 
+Question
+========
+Uma experimento no delineamento blocos ao acaso foi realizado para analisar o desempenho produtivo de uma cultivar de soja em função de `r i` doses (em $Kg/ha$) de fertilizante foliar a base de magnésio. As avaliações foram sistematizadas quanto a produtividade  em $(SC/ha)$, os dados estão apresentados na tabela a seguir:
+Considerando $\alpha$ = 5% resolva o quadro da ANOVA, interprete e reponda as questões abaixo.
+  
+*OBS. Utilize 3 casas decimais e a vírgula como separador decimal nas suas respostas numéricas e não utilize separador de milhar. Exemplo: 1234,567*
+  
+*A margem de erro adimitada como correta em cada item é de 0,05 para mais ou para menos*
+  
+$\textbf {Tabela 1: Produtividade de soja em função de diferentes doses de fertilizante.}$
+```{r table, echo=FALSE}
+kable(plan, align="ccc")
+```
+
+Questionlist
+------------
+* Qual o valor do Grau de Liberdade de Tratamento? \
+* Qual o valor do Grau de Liberdade de Bloco? \
+* Qual o valor do Grau de Liberdade de Erro? \
+* Qual o valor do Grau de Liberdade de Trotal? \
+* Qual o valor da Soma de Quadrados de Tratamento? \
+* Qual o valor da Soma de Quadrados de Bloco? \
+* Qual o valor da Soma de Quadrados de Erro? \
+* Qual o valor da Soma de Quadrados de Total? \
+* Qual o valor do Quadrado Médio de Tratamento? \
+* Qual o valor do Quadrado Médio de Bloco? \
+* Qual o valor do Quadrado Médio do Erro? \
+* Qual o valor da estatística F calculado de Tratamento? \
+* Qual o valor da estatística F calculado de Bloco? \
+* Qual o valor da estatística F tabelado de Tratamento? \
+* Qual o valor da estatística F tabelado de Bloco? \
+* Existe diferença significativa entre os tratamentos . \
+* A diferença entre os tratamentos não é estatisticamente significativa. \
+* Qual o valor do Coeficiente de Variação (em %, sem o símbolo %, somente o valor)? \
+* O modelo de regressão adequado a ser ajustado é o linear. \
+* O modelo de regressão adequado a ser ajustado é o quadrático. \
+* Qual o valor do coeficiente de determinação (R²) do modelo? \
+* Qual o valor do coeficiente de determinação ajustado (R²aj) do modelo? \
+* Qual o valor do ponto de máxima eficiência técnica? \
+
+Solution
+========
+Solutionlist
+------------
+* O valor do Grau de Liberdade de Tratamento é: `r glt` \
+* O valor do Grau de Liberdade de Bloco é `r glb` \
+* O valor do Grau de Liberdade de Erro é: `r gle` \
+* O valor do Grau de Liberdade Total é `r gltot` \
+* O valor da Soma de Quadrados de Tratamento é `r sqt` \
+* O valor da Soma de Quadrados de Bloco é `r sqb` \
+* O valor da Soma de Quadrados de Erro é `r sqe` \
+* O valor da Soma de Quadrados de Total é `r sqtot` \
+* O valor do Quadrado Médio de Tratamento é: `r qmt` \
+* O valor do Quadrado Médio de Bloco é: `r qmb` \
+* O valor do Quadrado Médio de Erro é: `r qme` \ 
+* O valor da estatística F calculado de Tratamento é: `r fct` \
+* O valor da estatística F calculado de Bloco é: `r fcb` \
+* O valor da estatística F tabelado de Tratamento é: `r ftt` \
+* O valor da estatística F tabelado de Bloco é: `r ftb` \
+* O efeito de Tratamento é `r ef_trat`.
+* 
+* O valor do Coeficiente de Variação (em %) é. `r cv` \
+* O modelo de regressão adequado a ser ajustado é o `r graumod`.
+* 
+* O valor do coeficiente de determinação (R²) do modelo é `r R2`. \
+* O valor do coeficiente de determinação ajustado (R²aj) do modelo é `r R2aj`.\
+* O valor do ponto de máxima eficiência técnica é `r pmet`. \
+
+
+  
+Resolução: \  
+
+$Quadro da ANOVA:$  
+```{r, echo=FALSE}
+myanova
+```
+
+
+$Gráfico$.
+```{r plot, echo=FALSE, fig.cap=" "}
+graf <- plan  |>  
+  ggplot(aes(x = TRAT, y = Y)) +
+  geom_point(color = "black") +
+  geom_smooth(method = "lm", 
+              formula = y ~ poly(x, 2, raw = TRUE),
+              se = FALSE, 
+              color = "blue")+
+  lims(y = c(0, max(plan$Y)+10)) +
+  stat_poly_eq(formula = y ~ poly(x, 2, raw = TRUE),
+               label.y = 0.9, 
+               eq.with.lhs = "italic(hat(Y))~`=`~", 
+               color = "blue",
+               aes(label = paste(after_stat(eq.label), 
+                                 after_stat(round(R2aj,4)),  
+                                 sep =  "*plain(\",\")~")), 
+               parse = TRUE) +
+  theme_bw()
+
+graf
+```
+
+
+Meta-information
+================
+exname: DBA_P1
+extype: cloze
+exclozetype: num|num|num|num|num|num|num|num|num|num|num|num|num|num|num|schoice|num|schoice|num|num|num
+exsolution: `r glt`|`r glb`|`r gle`|`r gltot`|`r sqt`|`r sqb`|`r sqe`|`r sqtot`|`r qmt`|`r qmb`|`r qme`|`r fct`|`r fcb`|`r ftt`|`r ftb`|`r ifelse(myanova[[1]][1,5]<=0.05, "10", "01")`|`r cv`|`r "01"`|`r R2`|`r R2aj`|`r pmet`
+extol: 0.05

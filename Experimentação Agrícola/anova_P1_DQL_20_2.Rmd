@@ -1,0 +1,155 @@
+---
+title: "P1_Q1_DQL"
+author: "Fernando Haesbaert"
+date: "Out, 2021"
+---
+```{r dgp, include = FALSE, echo = FALSE, results = "hide"} 
+library(exams)
+library(magrittr)
+library(knitr)
+library(ExpDes.pt)
+library(pacman)
+library(agricolae)
+library(tidyverse)
+library(pander)
+options(scipen = 999) #prevent scientific notation 
+
+##----------------------------------------------------------------------
+## Estrutura dos dados
+rm(list=ls()) # limpar os objetos
+t <- sample(5:7,1); 
+trat <- LETTERS[1:t];trat # tratamentos
+sort <- design.lsd(trat); sort # sorteio para um DQL
+croqui_DQL <- sort$sketch # croqui
+tab <- sort$book %>% 
+  as.tibble() %>% 
+  arrange(trat)
+# Crinado o Y
+mt <- rep(200,t)
+sg.t <- 1000
+sg.j <- 10
+sg.k <- 30
+sg.e <- 1000
+t.dat <- matrix(rnorm(t,mt, sqrt(sg.t)),
+                nrow = t*t) # iésimo efeito de Trat
+j.dat <- matrix(rnorm(t, 0, sqrt(sg.j)),
+                nrow = t*t) # késimo efeito de Coluna
+k.dat <- matrix(rnorm(t, 0, sqrt(sg.j)),
+                nrow = t*t) # késimo efeito de Linha
+e.dat <- matrix(rnorm(t*t, 0, sqrt(sg.e)),
+                nrow = t*t, ncol = 1) # iésimo efeito aleatório
+Y <- c(round(j.dat + k.dat + t.dat + e.dat)/2) %>% sort()
+tab <- tab %>% mutate(Prod=Y) %>% 
+  rename(Parcela=plots,
+         Linha=row,
+         Coluna=col,
+         Tratamento=trat) %>% 
+  arrange(Parcela)
+# Gerando Figura
+gg1 <-
+  ggplot(data = tab,
+         mapping = aes(x = Coluna,
+                       y = Linha,
+                       fill = Tratamento)) +
+  geom_tile() +
+  geom_text(mapping = aes(label = sprintf("%s \n %.1f", Tratamento, Prod))) +
+  coord_equal()
+## SOLUTION
+anova <- aov(Prod ~ Tratamento + Linha + Coluna, data=tab)
+myanova <- summary(anova)
+qmt <- round(myanova[[1]][1,3],3)
+qml <- round(myanova[[1]][2,3],3)
+qmc <- round(myanova[[1]][3,3],3)
+qme <- round(myanova[[1]][4,3],3)
+fct <- round(myanova[[1]][1,4],3)
+fcl <- round(myanova[[1]][2,4],3)
+fcc <- round(myanova[[1]][3,4],3)
+ef_trat<-ifelse(myanova[[1]][1,5]<=0.05, "Significativo", "Não Significativo")
+cv <- round(sqrt(qme)/mean(tab$Prod)*100, 3)
+
+tukey <- HSD.test(anova, "Tratamento")
+q <- tukey$parameters[[4]]
+delta <- round(q*sqrt(qme/t),3) 
+``` 
+Question
+========
+Uma experimento no delineamento quadrado latino foi realizado para analisar o desempenho de `r t` genótipos de cana-de-açucar $Saccharum\ officinarum$ L. As avaliações foram sistematizadas quanto a massa média de colmos por parcela $Prod\ (Kg/parcela)$, os dados estão apresentados na figura a seguir:  
+Considerando $\alpha$ = 5% resolva o quadro da ANOVA e análise complementar, interprete e reponda as questões abaixo.
+
+*OBS. Utilize 3 casas decimais e a vírgula como separador decimal nas suas respostas numéricas. Exemplo: 1,234*
+
+$Croqui\ do\ Experimento$
+```{r, fig.width = 15}
+gg1
+```
+
+
+Questionlist
+------------
+* Qual o valor do Quadrado Médio de Tratamento? \
+* Qual o valor do Quadrado Médio de Linha? \
+* Qual o valor do Quadrado Médio de Coluna? \
+* Qual o valor do Quadrado Médio do Erro? \
+* Qual o valor do da estatística F calculado de Tratamento? \
+* Qual o valor do da estatística F calculado de Linha? \
+* Qual o valor do da estatística F calculado de Coluna? \
+* Qual o valor do Coeficiente de Variação (em %, sem o símbolo %, somente o valor)? \
+* Existe diferença significativa entre os tratamentos . \
+* A diferença entre os tratamentos não é estatisticamente significativa. \
+* Qual o valor do $\Delta$ (Difereça Mínima Significativa) do Teste Tukey para compararar as médias ao nível de 5% de probabilidade de erro? \
+
+
+Solution
+========
+Solutionlist
+------------
+* O valor do Quadrado Médio de Tratamento é: `r qmt` \
+* O valor do Quadrado Médio de Linha é: `r qml` \
+* O valor do Quadrado Médio de Coluna é: `r qmc` \
+* O valor do Quadrado Médio de Erro é: `r qme` \ 
+* O valor do da estatística F calculado de Tratamento é: `r fct` \
+* O valor do da estatística F calculado de Linha é: `r fcl` \
+* O valor do da estatística F calculado de Coluna é: `r fcc` \
+* O valor do Coeficiente de Variação (em %) é. `r cv` \
+* O efeito de Tratamnto é `r ef_trat`.
+* 
+* O valor do $\Delta$ (Difereça Mínima Significativa) do Teste Tukey para compararar as médias ao nível de 5% de probabilidade de erro é: `r delta`
+
+
+
+Resolução:\  
+$ANOVA$.  
+```{r myanova, echo=FALSE, fig.cap=" "}
+panderOptions('knitr.auto.asis', FALSE)
+pander(myanova)
+```
+   
+$Teste\ Tukey$.  
+```{r Tukey, echo=FALSE, fig.cap=" "}
+pander(tukey$groups)
+```
+    
+$Gráfico$.  
+```{r plot, echo=FALSE, fig.cap=" "}
+graf <- tukey$groups %>% 
+  rownames_to_column(var = "trt") %>% 
+  mutate(trt = reorder(trt, -Prod, mean)) %>% 
+  ggplot(aes(trt, Prod)) +
+    geom_col(alpha = 0.8, color = "black") +
+    geom_text(aes(label = groups), vjust = 1.8, size = 9, color = "white") +
+    geom_label(aes(x = trt, y = Prod, label = round(Prod,2)))+
+    labs(x = "Genótipos", y = "Massa médias de colmos (Kg/parcela)") +
+    theme_bw(16)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+graf
+```
+
+
+
+Meta-information
+================
+exname: A3
+extype: cloze
+exclozetype: num|num|num|num|num|num|num|num|schoice|num
+exsolution: `r qmt`|`r qml`|`r qmc`|`r qme`|`r fct`|`r fcl`|`r fcc`|`r cv`|`r ifelse(myanova[[1]][1,5]<=0.05, "10", "01")`|`r delta`
+extol: 0.05
